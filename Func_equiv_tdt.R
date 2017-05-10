@@ -187,6 +187,17 @@ miss
 ## write to file
 write.table(ped_pk,'parent_and_kids.fam',col=F,row=F,quo=F,sep='\t')
 
+## also write sample annotation file
+s_pk <- ped_pk[,c('IID','FID')]
+s_pk$relationship <- 'child'
+s_pk$relationship[ped_pk$PID == 0] <- 'father'
+s_pk$relationship[ped_pk$PID == 0 & ped_pk$SEX==2] <- 'mother'
+names(s_pk) <- c('Sample','Family','Relationship')
+write.table(s_pk,'parent_and_kids_sampleAnnotations.tsv',col=T,row=F,quo=F,sep='\t')
+
+
+
+
 
 ## ------ parent1_kids2
 
@@ -221,6 +232,14 @@ for (i in 1:length(fam)) {
 ## write to file
 write.table(ped_pk1,'parent1_kids2.fam',col=F,row=F,quo=F,sep='\t')
 
+## also write sample annotation file
+s_pk1 <- ped_pk1[,c('IID','FID')]
+s_pk1$relationship <- 'child'
+s_pk1$relationship[ped_pk1$PID == 0] <- 'father'
+s_pk1$relationship[ped_pk1$PID == 0 & ped_pk1$SEX==2] <- 'mother'
+names(s_pk1) <- c('Sample','Family','Relationship')
+write.table(s_pk1,'parent1_kids2_sampleAnnotations.tsv',col=T,row=F,quo=F,sep='\t')
+
 
 ## ------ parent2_kids1
 
@@ -251,6 +270,13 @@ for (i in 1:length(fam)) {
 ## write to file
 write.table(ped_pk2,'parent2_kids1.fam',col=F,row=F,quo=F,sep='\t')
 
+## also write sample annotation file
+s_pk2 <- ped_pk2[,c('IID','FID')]
+s_pk2$relationship <- 'child'
+s_pk2$relationship[ped_pk2$PID == 0] <- 'father'
+s_pk2$relationship[ped_pk2$PID == 0 & ped_pk2$SEX==2] <- 'mother'
+names(s_pk2) <- c('Sample','Family','Relationship')
+write.table(s_pk2,'parent2_kids1_sampleAnnotations.tsv',col=T,row=F,quo=F,sep='\t')
 
 
 
@@ -278,8 +304,8 @@ setwd('/Users/daniel/Documents/functional_equivalence')
 library(data.table)
 
 ## read in singleton transmission list
-s_tran <- fread('output/parent_and_kids_parentalSingletonTransmission.tsv',stringsAsFactors=F)
-dim(s_tran)
+# s_tran <- fread('output/parent_and_kids_parentalSingletonTransmission.tsv',stringsAsFactors=F)
+# dim(s_tran)
 ## 3291224
 
 ## ---- parent1_kids2
@@ -319,16 +345,14 @@ nrow(s_k2) ## 2480747
 
 
 ## subset out variants that aren't parental singletons 
-sum(s_p1$variant %in% s_tran$Variant) ## 21207
-sum(s_k2$variant %in% s_tran$Variant) ## 1367193
-s_96_p1 <- subset(s_p1,s_p1$variant %in% s_tran$Variant)
-s_96_k2 <- subset(s_k2,s_k2$variant %in% s_tran$Variant)
-
-
-chk <- subset(s_p1,s_p1$variant %in% s_tran$Variant)
-table(chk$CHROM)
-chk <- subset(s_k2,s_k2$variant %in% s_tran$Variant)
-table(chk$CHROM)
+# sum(s_p1$variant %in% s_tran$Variant) ## 21207
+# sum(s_k2$variant %in% s_tran$Variant) ## 1367193
+# s_96_p1 <- subset(s_p1,s_p1$variant %in% s_tran$Variant)
+# s_96_k2 <- subset(s_k2,s_k2$variant %in% s_tran$Variant)
+# chk <- subset(s_p1,s_p1$variant %in% s_tran$Variant)
+# table(chk$CHROM)
+# chk <- subset(s_k2,s_k2$variant %in% s_tran$Variant)
+# table(chk$CHROM)
 
 ## Most parental matches coming from the X chromosome
 
@@ -368,23 +392,20 @@ nrow(s_k1) ## 1892102
 
 
 ## subset out variants that aren't parental singletons 
-sum(s_p2$variant %in% s_tran$Variant) ## 2827205
-sum(s_k1$variant %in% s_tran$Variant) ## 4641
-s_96_p2 <- subset(s_p2,s_p2$variant %in% s_tran$Variant)
-s_96_k1 <- subset(s_k1,s_k1$variant %in% s_tran$Variant)
-
-
-
-chk <- subset(s_p2,s_p2$variant %in% s_tran$Variant)
-table(chk$CHROM)
-chk <- subset(s_k1,s_k1$variant %in% s_tran$Variant)
-table(chk$CHROM)
+# sum(s_p2$variant %in% s_tran$Variant) ## 2827205
+# sum(s_k1$variant %in% s_tran$Variant) ## 4641
+# s_96_p2 <- subset(s_p2,s_p2$variant %in% s_tran$Variant)
+# s_96_k1 <- subset(s_k1,s_k1$variant %in% s_tran$Variant)
+# chk <- subset(s_p2,s_p2$variant %in% s_tran$Variant)
+# table(chk$CHROM)
+# chk <- subset(s_k1,s_k1$variant %in% s_tran$Variant)
+# table(chk$CHROM)
 
 
 
 ## VERDICT: 
- - Parent and Kids 1 have very few singletons
- - Parent and Kids 2 have a lot more
+ # - Parent and Kids 1 have very few singletons
+ # - Parent and Kids 2 have a lot more
 
 
 
@@ -399,8 +420,15 @@ table(chk$CHROM)
 
 ## ------ Kids1 Blocking scheme
 
+## subset full variant list to kids1 only
 pk2_kids <- subset(pk2_fam,pk2_fam$V3!='0')
 names(pk2_kids) <- c('FID','IID','PID','MID','SEX','AFF')
+
+write.table(pk2_kids$IID,'output/kids1.id',col=F,row=F,quo=F,sep='\t')
+
+## read in FULL variant list for parent2_kids1
+pk2_full <- fread('gzip -dc output/kids1_variants.txt.bgz',stringsAsFactors=F)
+
 
 father_shet_count <- NA
 mother_shet_count <- NA
@@ -416,7 +444,7 @@ for (i in 1:nrow(pk2_kids)) {
 	# flist <- subset(s_96_p1,s_96_p1$individual == pk2_kids$PID[i])
 	# mlist <- subset(s_96_p1,s_96_p1$individual == pk2_kids$MID[i])
 
-	klist <- subset(s_k1,s_k1$individual == pk2_kids$IID[i])
+	klist <- subset(pk2_full,pk2_full$individual == pk2_kids$IID[i])
 	flist <- subset(s_p1,s_p1$individual == pk2_kids$PID[i])
 	mlist <- subset(s_p1,s_p1$individual == pk2_kids$MID[i])
 
@@ -455,8 +483,14 @@ write.table(dat,'output/parent1_kids1_singletonTransmission_summary.txt',col=T,r
 
 ## ------ Kids2 Blocking scheme
 
+## subset full variant list to kids1 only
 pk1_kids <- subset(pk1_fam,pk1_fam$V3!='0')
 names(pk1_kids) <- c('FID','IID','PID','MID','SEX','AFF')
+
+write.table(pk1_kids$IID,'output/kids2.id',col=F,row=F,quo=F,sep='\t')
+
+## read in FULL variant list for parent2_kids1
+pk1_full <- fread('gzip -dc output/kids2_variants.txt.bgz',stringsAsFactors=F)
 
 father_shet_count <- NA
 mother_shet_count <- NA
@@ -472,7 +506,7 @@ for (i in 1:nrow(pk2_kids)) {
 	# flist <- subset(s_96_p2,s_96_p2$individual == pk1_kids$PID[i])
 	# mlist <- subset(s_96_p2,s_96_p2$individual == pk1_kids$MID[i])
 
-	klist <- subset(s_k2,s_k2$individual == pk1_kids$IID[i])
+	klist <- subset(pk1_full,pk1_full$individual == pk1_kids$IID[i])
 	flist <- subset(s_p2,s_p2$individual == pk1_kids$PID[i])
 	mlist <- subset(s_p2,s_p2$individual == pk1_kids$MID[i])
 
@@ -545,12 +579,21 @@ tmp <- merge(trans,imend[,c('IID','N_MENDEL_ERRORS','NSNP_MENDEL_ERRORS')],by='I
 
 ## denovos
 dnm <- read.table('parent_and_kids.deNovo',h=T,stringsAsFactors=F)
-
 tbl <- table(dnm$Child_ID)
 dnm_count <- cbind.data.frame(names(tbl),as.numeric(tbl))
 names(dnm_count) <- c('IID','denovo_count_unfiltered')
 
-tmp2 <- merge(tmp,dnm_count,by='IID',all.x=T)
+## stick to high prob denovos
+dnm2 <- subset(dnm,dnm$Validation_Likelihood=='HIGH_SNV' | dnm$Validation_Likelihood=='HIGH_indel')
+tbl2 <- table(dnm2$Child_ID)
+dnm2_count <- cbind.data.frame(names(tbl2),as.numeric(tbl2))
+names(dnm2_count) <- c('IID','denovo_count_filtered')
+
+## merge dnm counts
+dnm3 <- merge(dnm_count,dnm2_count,by='IID')
+
+## merge all data
+tmp2 <- merge(tmp,dnm3,by='IID',all.x=T)
 
 ## write to file
 write.table(tmp2,'family_transmission_denovo_summary.txt',col=T,row=F,quo=F,sep='\t')
@@ -561,19 +604,19 @@ write.table(tmp2,'family_transmission_denovo_summary.txt',col=T,row=F,quo=F,sep=
 
 cor(tmp2[,c('parental_tr','N_MENDEL_ERRORS','NSNP_MENDEL_ERRORS','denovo_count_unfiltered')])
 #                         parental_tr N_MENDEL_ERRORS NSNP_MENDEL_ERRORS denovo_count_unfiltered
-# parental_tr               1.0000000      -0.4074415         -0.5200937               0.7732809
-# N_MENDEL_ERRORS          -0.4074415       1.0000000          0.9764885              -0.2757560
-# NSNP_MENDEL_ERRORS       -0.5200937       0.9764885          1.0000000              -0.3570789
-# denovo_count_unfiltered   0.7732809      -0.2757560         -0.3570789               1.0000000
+# parental_tr               1.0000000       0.5709184          0.5745675              -0.3625213
+# N_MENDEL_ERRORS           0.5709184       1.0000000          0.9764885              -0.2757560
+# NSNP_MENDEL_ERRORS        0.5745675       0.9764885          1.0000000              -0.3570789
+# denovo_count_unfiltered  -0.3625213      -0.2757560         -0.3570789               1.0000000
 
 t.test(tmp2$parental_tr[tmp2$scheme==1],tmp2$parental_tr[tmp2$scheme==2])
-# t = -3.8716, df = 23.363, p-value = 0.0007565
+# t = 1.8199, df = 41.291, p-value = 0.07604
 # alternative hypothesis: true difference in means is not equal to 0
 # 95 percent confidence interval:
-#  -0.13223076 -0.04018452
+#  -0.0008206495  0.0158111348
 # sample estimates:
 # mean of x mean of y 
-# 0.2089896 0.2951973 
+# 0.4744182 0.4669229 
 
 
 
@@ -584,27 +627,85 @@ bb <- sapply(aa,'[',1)
 ssc <- subset(tmp2,bb=='Broad__SSC')
 
 t.test(ssc$parental_tr[ssc$scheme==1],ssc$parental_tr[ssc$scheme==2])
-# t = -1.6853, df = 17.555, p-value = 0.1096
+# t = 0.2228, df = 34.888, p-value = 0.825
 # alternative hypothesis: true difference in means is not equal to 0
 # 95 percent confidence interval:
-#  -0.058376817  0.006461236
+#  -0.006486735  0.008085901
 # sample estimates:
 # mean of x mean of y 
-# 0.2089896 0.2349474 
+# 0.4744182 0.4736186 
+
+
+## Plot: parental transmission x N_MENDEL_ERRORS
+
+pdf('transmission_by_mendelError.pdf')
+
+plot(tmp2$N_MENDEL_ERRORS,tmp2$parental_tr,xlab='mendelian error count',ylab='Parental singleton transmission rate',
+	ylim=c(0.4,0.55))
+
+abline(h=0.5,lty=2)
+
+points(tmp2$N_MENDEL_ERRORS[tmp2$scheme==1],tmp2$parental_tr[tmp2$scheme==1],pch=16,cex=0.9,col='green')
+points(tmp2$N_MENDEL_ERRORS[tmp2$scheme==2],tmp2$parental_tr[tmp2$scheme==2],pch=16,cex=0.9,col='blue')
+
+legend('topleft',legend=c('blocking scheme 1','blocking scheme 2'),fill=c('green','blue'),bty='n')
+
+dev.off()
+
+
+
+## Plot: Mother transmission x father_transmission
+
+pdf('FatherTransmission_by_MotherTransmission.pdf')
+
+plot(tmp2$father_tr,tmp2$mother_tr,xlab='Father singleton transmission rate',ylab='Mother singleton transmission rate',
+	xlim=c(0.4,0.55),ylim=c(0.4,0.55))
+
+abline(h=0.5,lty=3)
+abline(v=0.5,lty=3)
+abline(0,1,col='red',lty=2)
+
+points(tmp2$father_tr[tmp2$scheme==1],tmp2$mother_tr[tmp2$scheme==1],pch=16,cex=0.9,col='green')
+points(tmp2$father_tr[tmp2$scheme==2],tmp2$mother_tr[tmp2$scheme==2],pch=16,cex=0.9,col='blue')
+
+legend('topleft',legend=c('blocking scheme 1','blocking scheme 2'),fill=c('green','blue'),bty='n')
+
+dev.off()
+
+
+
+## Plot: parental singleton count x N_MENDEL_ERRORS
+
+scount <- tmp2$father_shet_count + tmp2$mother_shet_count
+
+pdf('SingletonCount_by_mendelError.pdf')
+
+plot(scount,tmp2$N_MENDEL_ERRORS,ylab='mendelian error count',xlab='Parental singleton count')
+
+points(scount[tmp2$scheme==1],tmp2$N_MENDEL_ERRORS[tmp2$scheme==1],pch=16,cex=0.9,col='green')
+points(scount[tmp2$scheme==2],tmp2$N_MENDEL_ERRORS[tmp2$scheme==2],pch=16,cex=0.9,col='blue')
+
+legend('topleft',legend=c('blocking scheme 1','blocking scheme 2'),fill=c('green','blue'),bty='n')
+
+dev.off()
 
 
 
 
+## Plot: parental singleton count x filtered_denovo_count
 
+scount <- tmp2$father_shet_count + tmp2$mother_shet_count
 
+pdf('FilteredDenovoCount_by_mendelError.pdf')
 
+plot(scount,tmp2$denovo_count_filtered,ylab='Filtered denovo count',xlab='Parental singleton count',ylim=c(0,2000))
 
+points(scount[tmp2$scheme==1],tmp2$denovo_count_filtered[tmp2$scheme==1],pch=16,cex=0.9,col='green')
+points(scount[tmp2$scheme==2],tmp2$denovo_count_filtered[tmp2$scheme==2],pch=16,cex=0.9,col='blue')
 
+legend('topleft',legend=c('blocking scheme 1','blocking scheme 2'),fill=c('green','blue'),bty='n')
 
-
-
-
-
+dev.off()
 
 
 
