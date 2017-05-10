@@ -11,7 +11,7 @@ OUTPUT file: family_transmission_denovo_summary.txt
 
 VARIANT FILTERING: none
 
-COLUMN description:
+## COLUMN description:
 
  * IID - offspring ID
  * FID - family number
